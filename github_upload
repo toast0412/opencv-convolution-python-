@@ -1,0 +1,11 @@
+git clone < URL> # github에서 URL 이용하여 다운 받는거 
+
+git config --global user.name "toast0412"
+git config --global user.email "toast0412@naver.com"
+
+git add 파일명  # github에 올릴 파일을 레퍼지토리에 저장 
+
+git commit -m "commit 내용 " 
+
+git push  # commit 한것을  github에 저장하는것 
+
