@@ -1,0 +1,78 @@
+import numpy as np
+import cv2 as cv
+from matplotlib import pyplot as plt
+from skimage.exposure import rescale_intensity
+import argparse
+
+ 
+
+def convolve(image, kernel, pad, stride):
+    #convloution sequence
+    (ih,iw) = image.shape[:2] # input 이미지의 height, width 를 가져옴
+    (kh, kw) = kernel.shape[:2] #kernel 의 height, width 를 가져옴
+    output_height = int((ih+2*pad -kh)/stride+1)
+    output_width = int((iw+2*pad -kw)/stride+1)
+    #output의 이미지의 크기를 결정
+    
+    image = cv.copyMakeBorder(image, pad, pad, pad, pad,cv.BORDER_REPLICATE)           
+    output = np.zeros((output_height, output_width,3), dtype="float32")
+    print(output_height)
+
+
+    for y in np.arange(pad, ih+pad,stride):
+        for x in np.arange(pad, iw+pad,stride):
+            y1 =int( y-(kh-pad)/2 )
+            y2 =int( y+(kh+pad)/2 )
+            x1 =int( x-(kw-pad)/2 )
+            x2 =int( x+(kw+pad)/2 )
+
+            
+            roi0 = image[y1:y2, x1: x2,0]
+            roi1 = image[y1:y2, x1: x2,1]
+            roi2 = image[y1:y2, x1: x2,2]
+            
+            #print(roi0)
+            #print(roi1)
+            #print(roi2)
+            
+            
+            k2 = (roi2*kernel).sum()
+            k1 = (roi1*kernel).sum()
+            k0 = (roi0*kernel).sum()
+            
+            y3 = ( (y-pad)/stride )
+            x3 = ( (x-pad)/stride )
+ 
+            output[ y3,x3,2 ] = k2
+            output[ y3,x3,1 ] = k1
+            output[ y3,x3,0 ] = k0
+            
+            #print(y3)
+            #print(x3)
+            
+    #output = rescale_intensity(output, in_range=(0, 255))
+    output = output.astype("uint8")
+    
+
+    return output
+
+def run():
+    #kernel = np.array( [[-1, -1, -1],[-1,  8, -1 ],[-1, -1, -1]] )
+    
+    img = cv.imread('messi5.jpg')
+    kernel = np.ones((5,5), np.float32)/25
+    print(kernel)
+    dst = convolve(img, kernel, 2, 3)
+    
+    plt.subplot(121),plt.imshow(img),plt.title('original')
+    plt.xticks([]),plt.yticks([])
+    plt.subplot(122),plt.imshow(dst),plt.title('Averaging')
+    plt.xticks([]),plt.yticks([])
+    plt.show()
+    cv.imshow('img',img)
+    cv.imshow('dst',dst)
+    cv.waitKey(0)
+    cv.destroyAllWindows()
+if __name__ == '__main__' :
+    run()
+
